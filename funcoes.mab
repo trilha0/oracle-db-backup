@@ -1,0 +1,34 @@
+#
+# Versao..: 202008051726
+# Autor...: Marcos Braga | braga.marcos at gmail.com
+# Data....: 05/08/2020
+# Script..: funcoes.mab
+#
+# Arquivo de funcoes utilizadas em varios scripts
+#
+function fLog {
+  fF=${1}       # log file (externo)
+  fM="${2}"     # menssagem
+  DT=$(date +%F)
+  HR=$(date +%T)
+  ZO=$(date +%z)
+  # logging
+  >>$fF echo "[$DT $HR $ZO] $fM"
+}
+
+# cuidando para que os logs antigos sejam gravados
+# quando atingirem o tamanho de 1MB (1024K)
+rotateLog() {
+  fR=${1}
+  [ -f "$fR" ] && return 1
+  tam=$(du $fR | awk '{print $1}')
+  if [ $tam -ge 1024 ]; then
+     [ -f $fR.4 ] && rm -f $fR.4 >/dev/null 2>&1
+     [ -f $fR.3 ] && mv $fR.3 $fR.4 >/dev/null 2>&1
+     [ -f $fR.2 ] && mv $fR.2 $fR.3 >/dev/null 2>&1
+     [ -f $fR.1 ] && mv $fR.1 $fR.2 >/dev/null 2>&1
+    mv $fR $fR.1
+  fi
+}
+#
+# End funcoes
