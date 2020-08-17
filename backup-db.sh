@@ -1,5 +1,5 @@
 #!/bin/bash
-# Versao..: 202008171032
+# Versao..: 202008171420
 # Autor...: Marcos Braga | braga.marcos at gmail.com
 # Data....: 19/10/2019
 # Script..: backup-db.sh
@@ -55,9 +55,7 @@ export _FX="/home/oracle/bin/funcoes.mab"
 export PATH=$ORACLE_HOME/bin:$PATH
 #
 # Script Start...
-# 202008011005 Begin
 _F0=${0%'.'*}
-# 202008011005 End
 _F1=$_F0.rman
 _F2=$_F0.log
 _F3=restaura-db.leiame
@@ -118,7 +116,6 @@ fLog $_F2 "Apagando os arquivos temporarios"
 # get last DBID from logfile
 _DBID=$(tac $_F2 | grep -m1 DBID | sed -r 's/(.*DBID=)([0-9]+)\)/\2/g')
 # get last controlfile backup file name
-#_CTRLFILE=$(tac $_F2 | grep -m1 controlfile-backup | sed -r 's/(.*handle=)(.*)(R.*)/\2/g')
 _CTRLFILE=$_ORADES/$(ls -tR $_ORADES | grep -m1 controlfile)
 _SPFILE=$_ORADES/$(ls -tR $_ORADES | grep -m1 spfile)
 #
