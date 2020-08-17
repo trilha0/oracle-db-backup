@@ -1,13 +1,8 @@
 #!/bin/bash
-# Versao..: 202008171420
-# Autor...: Marcos Braga | braga.marcos at gmail.com
-# Data....: 19/10/2019
-# Script..: backup-db.sh
-#
-# Script para backup fisico e gerencia dos archives
-#
-# entrada em /etc/crontab
-# 0 23 * * * oracle /home/oracle/bin/backup-db.sh
+# version=202008171420
+# author=Marcos Braga | braga.marcos at gmail.com
+# date=2019-10-19
+# script=backup-db.sh
 #
 ##########
 # Adicionar o caminho de destino dos arquivos de backup
@@ -44,13 +39,13 @@ export _FX="/home/oracle/bin/funcoes.mab"
 ##########
 #
 # Validating the variables
-[ -z $_ORADES ]     && echo -e "\nFalta Editar o Script, ver linha 15\n" && exit 1
-[ -z $_ARCDIAS ]    && echo -e "\nFalta Editar o Script, ver linha 19\n" && exit 1
-[ -z $_ORAARC ]     && echo -e "\nFalta Editar o Script, ver linha 23\n" && exit 1
-[ -z $ORACLE_SID ]  && echo -e "\nFalta Editar o Script, ver linha 27\n" && exit 1
-[ -z $ORACLE_BASE ] && echo -e "\nFalta Editar o Script, ver linha 31\n" && exit 1
-[ -z $ORACLE_HOME ] && echo -e "\nFalta Editar o Script, ver linha 35\n" && exit 1
-[ -f $_FX ] && echo -e "\nArquivo de Funcoes nao encontrado\nVer linha 39\n" && exit 1
+[ -z $_ORADES ]     && echo -e "\nFalta Editar o Script, ver linha 10\n" && exit 1
+[ -z $_ARCDIAS ]    && echo -e "\nFalta Editar o Script, ver linha 14\n" && exit 1
+[ -z $_ORAARC ]     && echo -e "\nFalta Editar o Script, ver linha 18\n" && exit 1
+[ -z $ORACLE_SID ]  && echo -e "\nFalta Editar o Script, ver linha 22\n" && exit 1
+[ -z $ORACLE_BASE ] && echo -e "\nFalta Editar o Script, ver linha 26\n" && exit 1
+[ -z $ORACLE_HOME ] && echo -e "\nFalta Editar o Script, ver linha 30\n" && exit 1
+[ -f $_FX ] && echo -e "\nArquivo de Funcoes nao encontrado\nVer linha 34\n" && exit 1
 # path
 export PATH=$ORACLE_HOME/bin:$PATH
 #
