@@ -1,5 +1,5 @@
 #
-# version=202008051726
+# version=202107231230
 # author=Marcos Braga | braga.marcos at gmail.com
 # date=2020-08-05
 # script=funcoes.mab
@@ -20,7 +20,7 @@ function fLog {
 # quando atingirem o tamanho de 1MB (1024K)
 rotateLog() {
   fR=${1}
-  [ -f "$fR" ] && return 1
+  [ -f "$fR" ] || return 1
   tam=$(du $fR | awk '{print $1}')
   if [ $tam -ge 1024 ]; then
      [ -f $fR.4 ] && rm -f $fR.4 >/dev/null 2>&1
