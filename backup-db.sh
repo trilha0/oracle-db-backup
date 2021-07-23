@@ -1,8 +1,11 @@
 #!/bin/bash
-# version=202008171420
+# version=202107231228
 # author=Marcos Braga | braga.marcos at gmail.com
 # date=2019-10-19
 # script=backup-db.sh
+#
+# Version_____ Author______ Notes______________________________________________
+# 202107231228 marcos braga Ajust some global variables
 #
 ##########
 # Adicionar o caminho de destino dos arquivos de backup
@@ -31,7 +34,7 @@ export ORACLE_HOME=
 #
 # Localizacao do arquivo de funcoes
 #
-export _FX="/home/oracle/bin/funcoes.mab"
+export FILEFNC="<PATH>/funcoes.mab"
 #
 ##########
 # If you have not sure about what you're doing, please don't
@@ -39,22 +42,22 @@ export _FX="/home/oracle/bin/funcoes.mab"
 ##########
 #
 # Validating the variables
-[ -z $_ORADES ]     && echo -e "\nFalta Editar o Script, ver linha 10\n" && exit 1
-[ -z $_ARCDIAS ]    && echo -e "\nFalta Editar o Script, ver linha 14\n" && exit 1
-[ -z $_ORAARC ]     && echo -e "\nFalta Editar o Script, ver linha 18\n" && exit 1
-[ -z $ORACLE_SID ]  && echo -e "\nFalta Editar o Script, ver linha 22\n" && exit 1
-[ -z $ORACLE_BASE ] && echo -e "\nFalta Editar o Script, ver linha 26\n" && exit 1
-[ -z $ORACLE_HOME ] && echo -e "\nFalta Editar o Script, ver linha 30\n" && exit 1
-[ -f $_FX ] && echo -e "\nArquivo de Funcoes nao encontrado\nVer linha 34\n" && exit 1
+[ -z $_ORADES ]     && echo -e "\nFalta Editar o Script, ver linha 10\n"             && exit 1
+[ -z $_ARCDIAS ]    && echo -e "\nFalta Editar o Script, ver linha 14\n"             && exit 1
+[ -z $_ORAARC ]     && echo -e "\nFalta Editar o Script, ver linha 18\n"             && exit 1
+[ -z $ORACLE_SID ]  && echo -e "\nFalta Editar o Script, ver linha 22\n"             && exit 1
+[ -z $ORACLE_BASE ] && echo -e "\nFalta Editar o Script, ver linha 26\n"             && exit 1
+[ -z $ORACLE_HOME ] && echo -e "\nFalta Editar o Script, ver linha 30\n"             && exit 1
+[ -f $FILEFNC ]     && echo -e "\nArquivo de Funcoes nao encontrado, ver linha 34\n" && exit 1
 # path
 export PATH=$ORACLE_HOME/bin:$PATH
 #
 # Script Start...
-_F0=${0%'.'*}
-_F1=$_F0.rman
-_F2=$_F0.log
-_F3=restaura-db.leiame
-_F4=orapw${ORACLE_SID}
+FILERAW=${0%'.'*}
+FILERMN=$FILERAW.rman
+FILELOG=$FILERAW.log
+FILEREC=restaura-db.leiame
+FILEPWD=orapw${ORACLE_SID}
 #
 # data e hora
 An=$(date +%Y)  # ano
@@ -65,17 +68,17 @@ Mi=$(date +%M)  # minutos
 Se=$(date +%S)  # segundos
 #
 # load functions
-. $_FX
+. $FILEFNC
 #
 # executing logfile rotate
-[ -f "$_F2" ] && rotateLog $_F2
+[ -f "$" ] && rotateLog $FILELOG
 #
 # registrando tudo...
-fLog $_F2 "Script Inicio..."
+fLog $FILELOG "Script Inicio..."
 #
-fLog $_F2 "Criando arquivo com os comandos rman"
+fLog $FILELOG "Criando arquivo com os comandos rman"
 #
->$_F1 cat <<EOF
+>$FILERMN cat <<EOF
 connect target /
 run {
 configure controlfile autobackup off;
@@ -100,31 +103,31 @@ catalog start with '${_ORAARC}';
 }
 EOF
 #
-fLog $_F2 "Executando RMAN"
+fLog $FILELOG "Executando RMAN"
 #
-#>>$_F2 rman nocatalog log ${_ORADES}/${An}${Me}${Di}-${Hr}${Mi}${Se}-backup.log @$_F1
->>$_F2 rman nocatalog @$_F1
+#>>$FILELOG rman nocatalog log ${_ORADES}/${An}${Me}${Di}-${Hr}${Mi}${Se}-backup.log @$FILERMN
+>>$FILELOG rman nocatalog @$FILERMN
 #
-fLog $_F2 "Apagando os arquivos temporarios"
+fLog $FILELOG "Apagando os arquivos temporarios"
 #
 # creating file with restore procedures
 # get last DBID from logfile
-_DBID=$(tac $_F2 | grep -m1 DBID | sed -r 's/(.*DBID=)([0-9]+)\)/\2/g')
+_DBID=$(tac $FILELOG | grep -m1 DBID | sed -r 's/(.*DBID=)([0-9]+)\)/\2/g')
 # get last controlfile backup file name
 _CTRLFILE=$_ORADES/$(ls -tR $_ORADES | grep -m1 controlfile)
 _SPFILE=$_ORADES/$(ls -tR $_ORADES | grep -m1 spfile)
 #
-fLog $_F2 "Backup of oracle database pwfile"
+fLog $FILELOG "Backup of oracle database pwfile"
 # getting old pwfile name
-_X=$(ls $_ORADES/*${_F4})
+_X=$(ls $_ORADES/*${FILEPWD})
 # deleting old pwfile
-[ -f "$_X" ] && >>$_F2 rm -v $_X
+[ -f "$_X" ] && >>$FILELOG rm -v $_X
 # getting new pwfile
->>$_F2 cp -v $ORACLE_HOME/dbs/$_F4 $_ORADES/${An}${Me}${Di}-${Hr}${Mi}${Se}-$_F4
+>>$FILELOG cp -v $ORACLE_HOME/dbs/$FILEPWD $_ORADES/${An}${Me}${Di}-${Hr}${Mi}${Se}-$FILEPWD
 #
->$_ORADES/$_F3 cat << _EOF_
+>$_ORADES/$FILEREC cat << _EOF_
 export ORACLE_SID=$ORACLE_SID
-cp -v ${_ORADES}/${An}${Me}${Di}-${Hr}${Mi}${Se}-$_F4 $ORACLE_HOME/dbs/
+cp -v ${_ORADES}/${An}${Me}${Di}-${Hr}${Mi}${Se}-$FILEPWD $ORACLE_HOME/dbs/
 rman
 connect target /
 set dbid $_DBID;
@@ -142,6 +145,6 @@ startup
 exit
 _EOF_
 #
-[ -f $_F1 ] && >>$_F2 rm -fv $_F1
-fLog $_F2 "Script Fim."
+[ -f $FILERMN ] && >>$FILELOG rm -fv $FILERMN
+fLog $FILELOG "Script Fim."
 ## Script End ##
