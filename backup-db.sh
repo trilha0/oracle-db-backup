@@ -1,54 +1,57 @@
 #!/bin/bash
-# version=202107231228
-# author=Marcos Braga | braga.marcos at gmail.com
-# date=2019-10-19
-# script=backup-db.sh
+# version..: 202307210940
+# author...: Marcos Braga | braga.marcos at gmail.com
+# created..: 2019-10-19
+# script...: backup-db.sh
 #
-# Version_____ Author______ Notes______________________________________________
-# 202107231228 marcos braga Ajust some global variables
-#
-##########
+#------------------------------------------------------------------------------
 # Adicionar o caminho de destino dos arquivos de backup
-#
-export _ORADES=
-#
+# 1 = Backup principal; 2 = Copia do backup; 3 = Copia do backup para nuvem.
+export _ORADES=(/dir/path1 /dir/path2 /dir/path3)
+#------------------------------------------------------------------------------
 # Quantos dias manter archives no disco
-#
 export _ARCDIAS=7
-#
+#------------------------------------------------------------------------------
 # Diretorio onde sao gravados os archives
-#
-export _ORAARC=
-#
+export _ORAARC=/dir/path/archives
+#------------------------------------------------------------------------------
 # Nome do banco de dados, ORACLE_SID
-#
-export ORACLE_SID=
-#
+export ORACLE_SID=oraclesid
+#------------------------------------------------------------------------------
 # Diretorio do ORACLE_BASE
-#
-export ORACLE_BASE=
-#
+export ORACLE_BASE=/dir/path/oraclebase
+#------------------------------------------------------------------------------
 # Diretorio do ORACLE_HOME
-#
-export ORACLE_HOME=
-#
-# Localizacao do arquivo de funcoes
-#
-export FILEFNC="<PATH>/funcoes.mab"
-#
+export ORACLE_HOME=/dir/path/oraclehome
+#------------------------------------------------------------------------------
+# Localizacao arquivo de funcoes
+export FILEFNC=/dir/path/funcoes.mab
+#------------------------------------------------------------------------------
 ##########
 # If you have not sure about what you're doing, please don't
 # change the script from this point
 ##########
+BTYPE=${1}
+case $BTYPE in
+  [Ff][Uu][Ll][Ll]|0)
+    BTYPE=(0 full)
+    BDESC=Backup_Diario_Full
+    BARCH=plus archivelog
+    BCRO=
+  ;;
+  [Ii][Nn][Cc]|1)
+    BTYPE=(1 incremental)
+    BDESC=Backup_Diario_Incremental
+    BARC=
+    BCRO=
+  ;;
+  *)
+    echo "Opcao Invalida."
+    echo "Opcoes validas: Full ou Inc"
+    exit 1
+  ;;
+esac
 #
-# Validating the variables
-[ -z $_ORADES ]     && echo -e "\nFalta Editar o Script, ver linha 10\n"             && exit 1
-[ -z $_ARCDIAS ]    && echo -e "\nFalta Editar o Script, ver linha 14\n"             && exit 1
-[ -z $_ORAARC ]     && echo -e "\nFalta Editar o Script, ver linha 18\n"             && exit 1
-[ -z $ORACLE_SID ]  && echo -e "\nFalta Editar o Script, ver linha 22\n"             && exit 1
-[ -z $ORACLE_BASE ] && echo -e "\nFalta Editar o Script, ver linha 26\n"             && exit 1
-[ -z $ORACLE_HOME ] && echo -e "\nFalta Editar o Script, ver linha 30\n"             && exit 1
-[ -f $FILEFNC ]     && echo -e "\nArquivo de Funcoes nao encontrado, ver linha 34\n" && exit 1
 # path
 export PATH=$ORACLE_HOME/bin:$PATH
 #
@@ -63,6 +66,7 @@ FILEPWD=orapw${ORACLE_SID}
 An=$(date +%Y)  # ano
 Me=$(date +%m)  # mes
 Di=$(date +%d)  # dia
+Da=$(date +%d --date="2 days ago")  # - dois dias
 Hr=$(date +%H)  # hora
 Mi=$(date +%M)  # minutos
 Se=$(date +%S)  # segundos
@@ -71,63 +75,66 @@ Se=$(date +%S)  # segundos
 . $FILEFNC
 #
 # executing logfile rotate
-[ -f "$" ] && rotateLog $FILELOG
+[ -f "$FILELOG" ] && rotateLog "$FILELOG"
 #
 # registrando tudo...
-fLog $FILELOG "Script Inicio..."
+fLog $FILELOG "Script Inicio - $BDESC"
 #
 fLog $FILELOG "Criando arquivo com os comandos rman"
 #
->$FILERMN cat <<EOF
+>$FILERMN echo '
 connect target /
-run {
-configure controlfile autobackup off;
+run {'
+if [ ${BTYPE[0]} = 0 ]; then
+  >>$FILERMN echo 'configure controlfile autobackup off;
+#configure archivelog deletion policy to shipped to standby;
+configure archivelog deletion policy to none;
+configure device type disk backup type to compressed backupset;
 crosscheck backup;
-crosscheck archivelog all;
-allocate channel d1 type disk format '${_ORADES}/${An}${Me}${Di}-${Hr}${Mi}${Se}-database-full-backup-%U';
-backup tag bkp_database as compressed backupset not backed up 1 times database;
-release channel d1;
-allocate channel d2 type disk format '${_ORADES}/${An}${Me}${Di}-${Hr}${Mi}${Se}-archives-backup-%U';
-backup tag bkp_archives as compressed backupset not backed up 1 times archivelog all;
-release channel d2;
-allocate channel d3 type disk format '${_ORADES}/${An}${Me}${Di}-${Hr}${Mi}${Se}-spfilefile-backup-%U';
-backup tag bkp_spfile (spfile);
-release channel d3;
-allocate channel d4 type disk format '${_ORADES}/${An}${Me}${Di}-${Hr}${Mi}${Se}-controlfile-backup-%U';
-backup tag bkp_controlfile (current controlfile);
-release channel d4;
+crosscheck archivelog all;'
+fi
+>>$FILERMN echo "allocate channel Ch1 type disk maxpiecesize 4g format '${_ORADES[0]}/${An}${Me}${Di}-${Hr}${Mi}${Se}-database-backup-${BTYPE[1]}-%U';
+backup incremental level ${BTYPE[0]} tag $BDESC as compressed backupset not backed up 1 times database $BARCH;
+release channel Ch1;
+allocate channel Ch1 type disk format '${_ORADES[0]}/${An}${Me}${Di}-${Hr}${Mi}${Se}-controlfile-backup-${BTYPE[1]}-%U';
+backup tag Backup_Controlfile (current controlfile);
+release channel Ch1;"
+if [ ${BTYPE[0]} = 0 ]; then
+  >>$FILERMN echo "allocate channel Ch1 type disk format '${_ORADES[0]}/${An}${Me}${Di}-${Hr}${Mi}${Se}-spfile-backup-${BTYPE[1]}-%U';
+backup tag Backup_SPFile (spfile);
+release channel Ch1;
 delete noprompt expired backup;
 change archivelog from time 'sysdate-${_ARCDIAS}' uncatalog;
 delete noprompt obsolete;
-catalog start with '${_ORAARC}';
-}
-EOF
+catalog start with '${_ORAARC}';"
+fi
+>>$FILERMN echo '}'
 #
 fLog $FILELOG "Executando RMAN"
-#
-#>>$FILELOG rman nocatalog log ${_ORADES}/${An}${Me}${Di}-${Hr}${Mi}${Se}-backup.log @$FILERMN
 >>$FILELOG rman nocatalog @$FILERMN
-#
-fLog $FILELOG "Apagando os arquivos temporarios"
 #
 # creating file with restore procedures
 # get last DBID from logfile
 _DBID=$(tac $FILELOG | grep -m1 DBID | sed -r 's/(.*DBID=)([0-9]+)\)/\2/g')
 # get last controlfile backup file name
+#_CTRLFILE=$(tac $FILELOG | grep -m1 controlfile-backup | sed -r 's/(.*handle=)(.*)(R.*)/\2/g')
 _CTRLFILE=$_ORADES/$(ls -tR $_ORADES | grep -m1 controlfile)
 _SPFILE=$_ORADES/$(ls -tR $_ORADES | grep -m1 spfile)
 #
-fLog $FILELOG "Backup of oracle database pwfile"
-# getting old pwfile name
-_X=$(ls $_ORADES/*${FILEPWD})
-# deleting old pwfile
-[ -f "$_X" ] && >>$FILELOG rm -v $_X
-# getting new pwfile
->>$FILELOG cp -v $ORACLE_HOME/dbs/$FILEPWD $_ORADES/${An}${Me}${Di}-${Hr}${Mi}${Se}-$FILEPWD
+if [ ${BTYPE[0]} = 0 ]; then
+  fLog $FILELOG "Backup of oracle database pwfile"
+  # getting old pwfile name
+  _X=$(ls $_ORADES/*${FILEPWD})
+  # deleting old pwfile
+  [ -f "$_X" ] && >>$FILELOG rm -v $_X
+  # getting new pwfile
+  >>$FILELOG cp -v $ORACLE_HOME/dbs/$FILEPWD $_ORADES/${An}${Me}${Di}-${Hr}${Mi}${Se}-$FILEPWD
+fi
 #
->$_ORADES/$FILEREC cat << _EOF_
+if [ ${BTYPE[0]} = 0 ]; then
+  >$_ORADES/${An}${Me}${Di}-${Hr}${Mi}${Se}-$FILELEI cat << _EOF_
 export ORACLE_SID=$ORACLE_SID
-cp -v ${_ORADES}/${An}${Me}${Di}-${Hr}${Mi}${Se}-$FILEPWD $ORACLE_HOME/dbs/
+cp -v ${_ORADES[0]}/${An}${Me}${Di}-${Hr}${Mi}${Se}-$FILEPWD $ORACLE_HOME/dbs/$FILEPWD
 rman
 connect target /
 set dbid $_DBID;
@@ -144,7 +151,19 @@ shutdown immediate;
 startup
 exit
 _EOF_
+fi
 #
+fLog $FILELOG "[COPY-JOB] Copiando o backup para um segundo local"
+>>$FILELOG cp -v ${_ORADES[0]}/${An}${Me}${Di}-${Hr}${Mi}${Se}* ${_ORADES[1]}/
+fLog $FILELOG "[COPY-JOB-CLOUD] Compactando o backup full para o diretorio da nuvem"
+>>$FILELOG tar cvfzP ${_ORADES[2]}/${An}${Me}${Di}-${Hr}${Mi}${Se}-${BDESC}.tgz ${_ORADES[0]}/${An}${Me}${Di}-${Hr}${Mi}${Se}*
+fLog $FILELOG "[COPY-JOB] Apagando arquivos antigos"
+BKPOLD=$(ls ${_ORADES[1]}/${An}${Me}${Da}*)
+fLog $FILELOG "[COPY-JOB-CLOUD] Apagando arquivos antigos"
+[ -n "$BKPOLD" ] && >>$FILELOG rm -v $BKPOLD
+BKPOLD=$(ls ${_ORADES[2]}/${An}${Me}${Da}*)
+[ -n "$BKPOLD" ] && >>$FILELOG rm -v $BKPOLD
+fLog $FILELOG "Apagando os arquivos temporarios"
 [ -f $FILERMN ] && >>$FILELOG rm -fv $FILERMN
-fLog $FILELOG "Script Fim."
+fLog $FILELOG "Script Fim - $BDESC."
 ## Script End ##
