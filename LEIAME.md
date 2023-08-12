@@ -8,27 +8,25 @@ Antes de começar, é importante editar o script e definir alguns parâmetros pa
 
 Parâmetros:
 _ORADES
-Esse parâmetro
+Esse parâmetro indica um ou mais caminhos para onde o backup será copiado. É possível adicionar mais caminhos separados por espaço, dentro do parênteses "()". Ex.
+_ORADES=(/caminho/1 /caminho/2)
 
-#------------------------------------------------------------------------------
-# Adicionar o caminho de destino dos arquivos de backup
-# 1 = Backup principal; 2 = Copia do backup; 3 = Copia do backup para nuvem.
-export _ORADES=(/dir/path1 /dir/path2 /dir/path3)
-#------------------------------------------------------------------------------
-# Quantos dias manter archives no disco
-export _ARCDIAS=7
-#------------------------------------------------------------------------------
-# Diretorio onde sao gravados os archives
-export _ORAARC=/dir/path/archives
-#------------------------------------------------------------------------------
-# Nome do banco de dados, ORACLE_SID
-export ORACLE_SID=oraclesid
-#------------------------------------------------------------------------------
-# Diretorio do ORACLE_BASE
-export ORACLE_BASE=/dir/path/oraclebase
-#------------------------------------------------------------------------------
-# Diretorio do ORACLE_HOME
-export ORACLE_HOME=/dir/path/oraclehome
+_ARCDIAS
+Parâmetro que define o número de dias em que os _archives_ (redo logs arquivados) do banco de dados serão mantidos.
+
+_ORAARC
+Parâmetro que indica qual é o diretório onde os _archives_ do banco de dados são gravados.
+
+ORACLE_SID
+Parâmetro que indica o nome do banco de dados
+
+ORACLE_BASE
+Parâmetro que indica o caminho base de instalação do banco de dados.
+
+ORACLE_HOME
+Parâmetro que indica o caminho de instalação do banco de dados.
+
+
 #------------------------------------------------------------------------------
 # Localizacao arquivo de funcoes
 export FILEFNC=/dir/path/funcoes.mab
