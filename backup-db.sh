@@ -1,6 +1,6 @@
 #!/bin/bash
 # version..: 202307210940
-# author...: Marcos Braga | braga.marcos at gmail.com
+# author...: Marcos Braga
 # created..: 2019-10-19
 # script...: backup-db.sh
 #
