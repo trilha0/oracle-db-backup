@@ -1,0 +1,3 @@
+allocate channel Canal1 type disk format '[PATH]/[DT]-spfile-backup-[LEVEL]-%U';
+backup tag Backup_SPFile (spfile);
+release channel Canal1;

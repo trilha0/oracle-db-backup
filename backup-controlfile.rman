@@ -1,0 +1,3 @@
+allocate channel Canal1 type disk format '[PATH]/[DT]-controlfile-backup-[LEVEL]-%U';
+backup tag Backup_Controlfile (current controlfile);
+release channel Canal1;
