@@ -24,13 +24,30 @@ export ORACLE_BASE=/dir/path/oraclebase
 # Diretorio do ORACLE_HOME
 export ORACLE_HOME=/dir/path/oraclehome
 #------------------------------------------------------------------------------
-# Localizacao arquivo de funcoes
-export FILEFNC=/dir/path/funcoes.mab
+# If you're not sure about what you're doing, please don't change the script
+# from this point
 #------------------------------------------------------------------------------
-##########
-# If you have not sure about what you're doing, please don't
-# change the script from this point
-##########
+# Função que cria um carimbo de data/hora +mensagem para usar no log
+function fLog {
+  fM="${1}"     # menssagem
+  DT=$(date +%F)
+  HR=$(date +%T)
+  ZO=$(date +%z)
+}
+# Função que arquiva os logs quando atingem o tamanho determinado
+rotateLog() {
+  fR=${1}
+  [ -f "$fR" ] || return 1
+  tam=$(du $fR | awk '{print $1}')
+  if [ $tam -ge 1024 ]; then
+     [ -f $fR.4 ] && rm -f $fR.4 >/dev/null 2>&1
+     [ -f $fR.3 ] && mv $fR.3 $fR.4 >/dev/null 2>&1
+     [ -f $fR.2 ] && mv $fR.2 $fR.3 >/dev/null 2>&1
+     [ -f $fR.1 ] && mv $fR.1 $fR.2 >/dev/null 2>&1
+    mv $fR $fR.1
+  fi
+}
+#
 BTYPE=${1}
 case $BTYPE in
   [Ff][Uu][Ll][Ll]|0)
@@ -78,9 +95,9 @@ Se=$(date +%S)  # segundos
 [ -f "$FILELOG" ] && rotateLog "$FILELOG"
 #
 # registrando tudo...
-fLog $FILELOG "Script Inicio - $BDESC"
+>>$FILELOG fLog "Script Inicio - $BDESC"
 #
-fLog $FILELOG "Criando arquivo com os comandos rman"
+>>$FILELOG fLog "Criando arquivo com os comandos rman"
 #
 >$FILERMN echo '
 connect target /
@@ -110,7 +127,7 @@ catalog start with '${_ORAARC}';"
 fi
 >>$FILERMN echo '}'
 #
-fLog $FILELOG "Executando RMAN"
+>>$FILELOG fLog "Executando RMAN"
 >>$FILELOG rman nocatalog @$FILERMN
 #
 # creating file with restore procedures
@@ -122,7 +139,7 @@ _CTRLFILE=$_ORADES/$(ls -tR $_ORADES | grep -m1 controlfile)
 _SPFILE=$_ORADES/$(ls -tR $_ORADES | grep -m1 spfile)
 #
 if [ ${BTYPE[0]} = 0 ]; then
-  fLog $FILELOG "Backup of oracle database pwfile"
+  >>$FILELOG fLog "Backup of oracle database pwfile"
   # getting old pwfile name
   _X=$(ls $_ORADES/*${FILEPWD})
   # deleting old pwfile
@@ -153,17 +170,17 @@ exit
 _EOF_
 fi
 #
-fLog $FILELOG "[COPY-JOB] Copiando o backup para um segundo local"
+>>$FILELOG fLog "[COPY-JOB] Copiando o backup para um segundo local"
 >>$FILELOG cp -v ${_ORADES[0]}/${An}${Me}${Di}-${Hr}${Mi}${Se}* ${_ORADES[1]}/
-fLog $FILELOG "[COPY-JOB-CLOUD] Compactando o backup full para o diretorio da nuvem"
+>>$FILELOG fLog "[COPY-JOB-CLOUD] Compactando o backup full para o diretorio da nuvem"
 >>$FILELOG tar cvfzP ${_ORADES[2]}/${An}${Me}${Di}-${Hr}${Mi}${Se}-${BDESC}.tgz ${_ORADES[0]}/${An}${Me}${Di}-${Hr}${Mi}${Se}*
-fLog $FILELOG "[COPY-JOB] Apagando arquivos antigos"
+>>$FILELOG fLog "[COPY-JOB] Apagando arquivos antigos"
 BKPOLD=$(ls ${_ORADES[1]}/${An}${Me}${Da}*)
-fLog $FILELOG "[COPY-JOB-CLOUD] Apagando arquivos antigos"
+>>$FILELOG fLog "[COPY-JOB-CLOUD] Apagando arquivos antigos"
 [ -n "$BKPOLD" ] && >>$FILELOG rm -v $BKPOLD
 BKPOLD=$(ls ${_ORADES[2]}/${An}${Me}${Da}*)
 [ -n "$BKPOLD" ] && >>$FILELOG rm -v $BKPOLD
-fLog $FILELOG "Apagando os arquivos temporarios"
+>>$FILELOG fLog "Apagando os arquivos temporarios"
 [ -f $FILERMN ] && >>$FILELOG rm -fv $FILERMN
-fLog $FILELOG "Script Fim - $BDESC."
+>>$FILELOG fLog "Script Fim - $BDESC."
 ## Script End ##
