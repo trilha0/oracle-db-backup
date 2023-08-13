@@ -2,16 +2,18 @@
 
 Script que faz backup do banco de dados Oracle usando RMAN.
 
-Os comandos RMAN do script foram construídos entre pesquisas na internet e a maior parte consultando o docs.oracle.com "Backup and Recovery User's Guide"
+Os comandos RMAN do script foram construídos entre pesquisas na internet e a 
+maior parte consultando o docs.oracle.com "Backup and Recovery User's Guide"
 
-Antes de começar, é importante editar o script e definir alguns parâmetros para o funcionamento do backup.
+Antes de começar, é importante editar o script e definir alguns parâmetros 
+para o funcionamento do backup.
 
-Parâmetros --------------------------------------------------------------------
+## Parâmetros
 _ORADES
 Esse parâmetro indica um ou mais caminhos para onde o backup será copiado. É 
 possível adicionar mais caminhos separados por espaço, dentro do parênteses 
 "()". Ex.
-_ORADES=(/caminho/1 /caminho/2)
+`_ORADES=(/caminho/1 /caminho/2)`
 
 _ARCDIAS
 Parâmetro que define o número de dias em que os _archives_ (redo logs 
