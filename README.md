@@ -1,13 +1,53 @@
-# oracle-db-backup
+# oracle-db-backup 0.5
 
-Script does backup from Oracle Database using RMAN.
+Script que faz backup do banco de dados Oracle usando RMAN.
 
-The commands was make among web searches and main part consulting docs.oracle.com "Backup and Recovery User's Guide"
+Os comandos RMAN do script foram construídos entre pesquisas na internet e a 
+maior parte consultando o docs.oracle.com "Backup and Recovery User's Guide"
 
-Historic
-Version_____  Author______  Observation________________________________________
-202307210940  Marcos Braga  +Third compressed copy for send to cloud.
-                            +Delete old backups from second copy.
-202307201730  Marcos Braga  +Add data to restore information file.
-202302120920  Marcos Braga  Updated to do full and incremental backups.
-202107231228  Marcos Braga  Ajust some global variables
+Antes de começar, é importante editar o script e definir alguns parâmetros 
+para o funcionamento do backup.
+
+## Parâmetros
+`_ORADES`
+Esse parâmetro indica um ou mais caminhos para onde o backup será copiado. É 
+possível adicionar mais caminhos separados por espaço, dentro do parênteses 
+"()". Ex.
+`_ORADES=(/caminho/1 /caminho/2)`
+
+`_ARCDIAS`
+Parâmetro que define o número de dias em que os _archives_ (redo logs 
+arquivados) do banco de dados serão mantidos.
+
+`_ORAARC`
+Parâmetro que indica qual é o diretório onde os _archives_ do banco de dados 
+são gravados.
+
+`ORACLE_SID`
+Parâmetro que indica o nome do banco de dados
+
+`ORACLE_BASE`
+Parâmetro que indica o caminho base de instalação do banco de dados.
+
+`ORACLE_HOME`
+Parâmetro que indica o caminho de instalação do banco de dados.
+
+`FILEFNC`
+Parâmetro que indica o caminho onde o arquivo de funções está localizado.
+
+
+## Histórico
+|-------------|-------------|---------------------------------------------------
+|Versao       |Autor        |Observações
+|-------------|-------------|---------------------------------------------------
+|202307210940 |Marcos Braga |+Terceira copia compactada do backup para enviar 
+|             |             |para a nuvem.
+|             |             |+Apaga backups antigos da segunda copia.
+|-------------|-------------|---------------------------------------------------
+|202307201730 |Marcos Braga |+Adicionado data ao arquivo de restauracao.
+|-------------|-------------|---------------------------------------------------
+|202302120920 |Marcos Braga |O script foi remodelado para fazer backup full e
+|             |             |incremental.
+|-------------|-------------|---------------------------------------------------
+|202107231228 |Marcos Braga |Ajuste de variáveis globais.
+|-------------|-------------|---------------------------------------------------
