@@ -37,17 +37,9 @@ Parâmetro que indica o caminho onde o arquivo de funções está localizado.
 
 
 ## Histórico
-|-------------|-------------|---------------------------------------------------
 |Versao       |Autor        |Observações
 |-------------|-------------|---------------------------------------------------
-|202307210940 |Marcos Braga |+Terceira copia compactada do backup para enviar 
-|             |             |para a nuvem.
-|             |             |+Apaga backups antigos da segunda copia.
-|-------------|-------------|---------------------------------------------------
+|202307210940 |Marcos Braga |+Terceira copia compactada do backup para enviar para a nuvem. +Apaga backups antigos da segunda copia.
 |202307201730 |Marcos Braga |+Adicionado data ao arquivo de restauracao.
-|-------------|-------------|---------------------------------------------------
-|202302120920 |Marcos Braga |O script foi remodelado para fazer backup full e
-|             |             |incremental.
-|-------------|-------------|---------------------------------------------------
+|202302120920 |Marcos Braga |O script foi remodelado para fazer backup full e incremental.
 |202107231228 |Marcos Braga |Ajuste de variáveis globais.
-|-------------|-------------|---------------------------------------------------
