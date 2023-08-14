@@ -14,12 +14,17 @@ if [ ! -d "$BKPRMANDESTINO" ]; then
   echo -e "\nO diretório destino do backup deve existir, favor verificar.\n"
   exit 1
 fi
-read -p "Quantas cópias do backup para outros diretórios/destinos [0]: " BKPRMANCOPIAS
-[ -z "$BKPRMANCOPIAS" ] && BKPRMANCOPIAS=0
-echo BKPRMANCOPIAS=$BKPRMANCOPIAS
-if [ $BKPRMANCOPIAS -gt 0 ]; then
-  for ((i=1;i<=$BKPRMANCOPIAS;i++)); do
-    read -p "Diretório $i para cópia do backup: " BKPRMANCOPIAS[$i]
-    echo BKPRMANCOPIAS[$i]=$BKPRMANCOPIAS[$i]
-  done
+read -n1 -p "Será feita cópia do backup para outro local? [s/N]: " SN
+if [ -n "$SN" ]; then
+  if [[ "$SN" -eq "s" || "$SN" -eq "S" ]]; then
+    read -p "Quantas cópias do backup para outros diretórios/destinos [1]: " BKPRMANCOPIAS
+    [ -z "$BKPRMANCOPIAS" ] && BKPRMANCOPIAS=0
+    echo BKPRMANCOPIAS=$BKPRMANCOPIAS
+    if [ $BKPRMANCOPIAS -gt 0 ]; then
+      for ((i=1;i<=$BKPRMANCOPIAS;i++)); do
+        read -p "Diretório $i para cópia do backup: " BKPRMANCOPIAS[$i]
+        echo BKPRMANCOPIAS[$i]=$BKPRMANCOPIAS[$i]
+      done
+    fi
+  fi
 fi
