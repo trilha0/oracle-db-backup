@@ -1,4 +1,4 @@
-# oracle-db-backup 0.6
+# oracle-db-backup 1.0
 
 Script que faz backup do banco de dados Oracle usando RMAN.
 
@@ -38,3 +38,9 @@ Parâmetro que indica o caminho de instalação do banco de dados.
 |202307201730 |Marcos Braga |+Adicionado data ao arquivo de restauracao.
 |202302120920 |Marcos Braga |O script foi remodelado para fazer backup full e incremental.
 |202107231228 |Marcos Braga |Ajuste de variáveis globais.
+
+## Fontes
+RMAN - Recovery Window Backup Retention Policy em Backups Incrementais
+https://www.oracle.com/br/technical-resources/articles/database-performance/recovery-windows-backup-incremental.html
+
+
