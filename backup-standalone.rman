@@ -1,0 +1,17 @@
+run {'
+crosscheck backup;
+crosscheck archivelog all;
+allocate channel Canal1 type disk maxpiecesize 4g format '[PATH]/[DT]-database-backup-[LEVEL]-%U';
+backup full tag [TAG] as compressed backupset not backed up 1 times database [ARCHIVE];
+release channel Canal1;
+allocate channel Canal1 type disk format '[PATH]/[DT]-controlfile-backup-[LEVEL]-%U';
+backup tag Backup_Controlfile (current controlfile);
+release channel Canal1;
+allocate channel Canal1 type disk format '[PATH]/[DT]-spfile-backup-[LEVEL]-%U';
+backup tag Backup_SPFile (spfile);
+release channel Canal1;
+delete noprompt expired backup;
+change archivelog from time 'sysdate-[ARCHIVEDIAS]' uncatalog;
+delete noprompt obsolete;
+catalog start with '[ARCHIVEPATH]';
+'}

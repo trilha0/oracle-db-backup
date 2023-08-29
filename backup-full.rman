@@ -1,0 +1,3 @@
+allocate channel Canal1 type disk maxpiecesize 4g format '[PATH]/[DT]-database-backup-[LEVEL]-%U';
+backup incremental level [LEVEL] tag [TAG] as compressed backupset not backed up 1 times database [ARCHIVE];
+release channel Canal1;
